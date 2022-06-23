@@ -40,7 +40,7 @@ defmodule Archives do
 
   def create_zip(files) do
     {:ok, {_, data}} =
-      :zip.zip("arc.zip", Enum.map(files, fn {name, data} -> {to_charlist(name), data} end), [
+      :zip.zip("", Enum.map(files, fn {name, data} -> {to_charlist(name), data} end), [
         :memory
       ])
 
