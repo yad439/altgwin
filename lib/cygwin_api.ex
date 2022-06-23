@@ -1,10 +1,10 @@
 defmodule CygwinApi do
   def get_packages(base) do
     {:ok, response} =
-      Finch.build(:get, base <> "/x86-64/setup.ini")
+      Finch.build(:get, base <> "/x86_64/setup.ini")
       |> Finch.request(FinchClient)
 
-    parse_setup(String.split(response.body, '\n'))
+    parse_setup(String.split(response.body, "\n"))
   end
 
   defp parse_setup_line(line, packages, current, prev) do
