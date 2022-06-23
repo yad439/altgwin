@@ -38,6 +38,15 @@ defmodule Archives do
     result
   end
 
+  def create_zip(files) do
+    {:ok, {_, data}} =
+      :zip.zip("arc.zip", Enum.map(files, fn {name, data} -> {to_charlist(name), data} end), [
+        :memory
+      ])
+
+    data
+  end
+
   defp recieve_external(port, data) do
     receive do
       {^port, {:data, msg}} ->

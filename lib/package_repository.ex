@@ -60,7 +60,7 @@ defmodule PackageRepository do
       %{
         name: Enum.fetch!(Enum.fetch!(chunk, 0), 0),
         path: Enum.fetch!(Enum.fetch!(chunk, 0), 1),
-        files: Enum.map(chunk, &%{name: Enum.fetch(&1, 2), path: Enum.fetch(&1, 3)})
+        files: Enum.map(chunk, &%{name: Enum.fetch!(&1, 2), path: Enum.fetch!(&1, 3)})
       }
     end)
   end
@@ -148,7 +148,7 @@ defmodule PackageRepository do
     rows =
       execute_select(
         conn,
-        "select packages.name, packages.path, files.name, files.path from packages inner join files on packages.name=files.package_name where files.name in (?1) sorted by package.name",
+        "select packages.name, packages.path, files.name, files.path from packages inner join files on packages.name=files.package_name where files.name in (?1) order by packages.name",
         [files]
       )
 
