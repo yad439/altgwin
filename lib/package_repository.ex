@@ -1,4 +1,4 @@
-defmodule Repository do
+defmodule PackageRepository do
   use GenServer
   alias Exqlite.Sqlite3
 

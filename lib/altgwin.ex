@@ -9,9 +9,9 @@ defmodule Altgwin do
 
   def main(_) do
     {:ok, _} = Finch.start_link(name: FinchClient)
-    {:ok, db} =Repository.start_link("packages.db")
+    {:ok, db} =PackageRepository.start_link("packages.db")
 
-    packages = Cygwin.parse_setup(File.stream!("setup.ini"))
+    packages = CygwinApi.parse_setup(File.stream!("setup.ini"))
 
     np =
       Enum.map(Enum.take(packages, 20), fn p ->
@@ -36,8 +36,8 @@ defmodule Altgwin do
 
     Enum.each(outdated, fn package ->
       IO.inspect(package.name)
-      files = Cygwin.get_files(package.name,package.version)
-      Repository.update_files(repository,package.name,files)
+      files = CygwinApi.get_files(package.name,package.version)
+      PackageRepository.update_files(repository,package.name,files)
     end)
   end
 end
