@@ -6,15 +6,23 @@ defmodule PackageRepository do
     GenServer.start_link(__MODULE__, filename)
   end
 
+  def add_package(service, package) do
+    GenServer.cast(service, {:add_one, package})
+  end
+
   def add_packages(service, packages) do
     GenServer.cast(service, {:add, packages})
+  end
+
+  def delete_package(service, package) do
+    GenServer.cast(service, {:delete, package})
   end
 
   def update_files(service, package, files) do
     GenServer.cast(service, {:update, package, files})
   end
 
-  def set_outdated(service, package, version) do
+  def set_outdated(service, package) do
     GenServer.cast(service, {:outdate, package})
   end
 
@@ -80,6 +88,24 @@ defmodule PackageRepository do
   end
 
   @impl true
+  def handle_cast({:add_one, package}, conn) do
+    execute(conn, "insert into packages values (?,?,?,1)", [
+      package.name,
+      package.version,
+      package.path
+    ])
+
+    {:noreply, conn}
+  end
+
+  @impl true
+  def handle_cast({:delete, package}, conn) do
+    execute(conn, "delete from files where package_name = ?", [package])
+    execute(conn, "delete from packages where name = ?", [package])
+    {:noreply, conn}
+  end
+
+  @impl true
   def handle_cast({:update, package, files}, conn) do
     execute(conn, "delete from files where package_name = ?", [package])
     {:ok, statement} = Sqlite3.prepare(conn, "insert into files values ((?1),(?2),(?3))")
@@ -95,8 +121,13 @@ defmodule PackageRepository do
   end
 
   @impl true
-  def handle_cast({:outdate, package, version}, conn) do
-    execute(conn, "update packages set version = ?, needs_update = 1 where name = ?", [version,package])
+  def handle_cast({:outdate, package}, conn) do
+    execute(conn, "update packages set version = ?, path = ?, needs_update = 1 where name = ?", [
+      package.version,
+      package.path,
+      package.name
+    ])
+
     {:noreply, conn}
   end
 
@@ -139,12 +170,12 @@ defmodule PackageRepository do
   @impl true
   def handle_cast(:close, conn) do
     Sqlite3.close(conn)
-    {:noreply,nil}
+    {:noreply, nil}
   end
 
   @impl true
-  def terminate(_,conn) do
-    if conn!=nil do
+  def terminate(_, conn) do
+    if conn != nil do
       Sqlite3.close(conn)
     end
   end
