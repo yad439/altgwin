@@ -18,13 +18,8 @@ defmodule Altgwin do
         Map.put(p, :files, Cygwin.get_files(p.name, p.version))
       end)
 
-    # IO.inspect(np)
     IO.inspect(Enum.at(np, 15))
-    # p=Enum.at(packages,50)
-    # IO.inspect(Cygwin.get_files(p.name,p.version))
-    # end
-    # end
-
+    
     {:ok, dt} =
       Finch.build(:get, "https://mirror.easyname.at/cygwin/" <> Enum.at(np, 15).path)
       |> Finch.request(FinchClient)
