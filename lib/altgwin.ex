@@ -1,5 +1,6 @@
 defmodule Altgwin do
   use Application
+  require Logger
 
   @impl true
   def start(_, args) do
@@ -9,7 +10,7 @@ defmodule Altgwin do
 
   def main(_) do
     {:ok, _} = Finch.start_link(name: FinchClient)
-    {:ok, db} =PackageRepository.start_link("packages.db")
+    {:ok, db} = PackageRepository.start_link("packages.db")
 
     packages = CygwinApi.parse_setup(File.stream!("setup.ini"))
 
@@ -19,7 +20,7 @@ defmodule Altgwin do
       end)
 
     IO.inspect(Enum.at(np, 15))
-    
+
     {:ok, dt} =
       Finch.build(:get, "https://mirror.easyname.at/cygwin/" <> Enum.at(np, 15).path)
       |> Finch.request(FinchClient)
@@ -31,13 +32,47 @@ defmodule Altgwin do
     nil
   end
 
+  def detect_outdated(mirror, repository) do
+    packages = CygwinApi.get_packages(mirror)
+
+    if Enum.empty?(packages) do
+      raise RuntimeError, message: "empty package list"
+    end
+
+    versions = PackageRepository.get_versions(repository)
+
+    Enum.each(packages, fn package ->
+      case versions[package.name] do
+        nil ->
+          Logger.info("New package: #{package.name}")
+          PackageRepository.add_package(repository, package)
+
+        version when version != package.version ->
+          Logger.info("Package updated: #{package.name} #{version} -> #{package.version}")
+          PackageRepository.set_outdated(repository, package)
+
+        _ ->
+          nil
+      end
+    end)
+
+    new_packs = MapSet.new(Stream.map(packages, & &1.name))
+
+    Enum.each(Map.keys(versions), fn package ->
+      if !MapSet.member?(new_packs, package) do
+        Logger.info("Package deleted: #{package}")
+        PackageRepository.delete_package(repository, package)
+      end
+    end)
+  end
+
   def update_files(repository) do
-    outdated = Repository.get_outdated(repository)
+    outdated = PackageRepository.get_outdated(repository)
 
     Enum.each(outdated, fn package ->
-      IO.inspect(package.name)
-      files = CygwinApi.get_files(package.name,package.version)
-      PackageRepository.update_files(repository,package.name,files)
+      Logger.debug("Update files of " <> package.name)
+      files = CygwinApi.get_files(package.name, package.version)
+      PackageRepository.update_files(repository, package.name, files)
     end)
   end
 end

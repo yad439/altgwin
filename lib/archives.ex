@@ -43,7 +43,8 @@ defmodule Archives do
       {^port, {:data, msg}} ->
         recieve_external(port, data <> msg)
 
-      {:DOWN, _, :port, ^port, _} -> data
+      {:DOWN, _, :port, ^port, _} ->
+        data
     end
   end
 end
