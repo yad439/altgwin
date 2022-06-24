@@ -95,4 +95,18 @@ defmodule Altgwin do
       |> Stream.map(fn {path, data} -> {Path.basename(to_string(path)), data} end)
     end)
   end
+
+  def get_dependencies(files,repository) do
+    get_dependencies(MapSet.new(files),repository,MapSet.new())
+  end
+
+  defp get_dependencies(files,repository, done) do
+    if Enum.empty?(files) do
+      files
+    else
+      direct=PackageRepository.get_dependencies(repository,files) |> MapSet.new()
+      done=MapSet.union(done,files)
+      MapSet.union(MapSet.union(MapSet.new(files),direct),get_dependencies(MapSet.difference(direct,done),done)
+    end
+  end
 end

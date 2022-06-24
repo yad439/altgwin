@@ -65,6 +65,10 @@ defmodule PackageRepository do
     end)
   end
 
+  def get_dependencies(service,files) do
+    GenServer.call(service, {:get_dependencies, files}) |> Stream.map(&hd/1)
+  end
+
   def close(service) do
     GenServer.cast(service, :close)
   end
@@ -165,6 +169,18 @@ defmodule PackageRepository do
       )
 
     {:reply, hd(rows), conn}
+  end
+
+  @impl true
+  def handle_call({:get_dependencies, files}, _, conn) do
+    {:ok, statement} = Sqlite3.prepare(conn,"select dependency from depenndencies where file = ?")
+    rows = Enum.flat_map files, fn file->
+      :ok = Sqlite3.bind(conn, statement, [file])
+      {:ok, res} = Sqlite3.fetch_all(conn, statement)
+      res
+    end
+    :ok = Sqlite3.release(conn, statement)
+    {:reply, rows, conn}
   end
 
   @impl true

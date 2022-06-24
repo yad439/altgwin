@@ -10,3 +10,7 @@ create table files (
   package_name text not null
   --foreign key package_id references packages (id)
 );
+create table dependencies (
+  file text not null,
+  dependency text not null
+);
