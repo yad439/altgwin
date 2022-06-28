@@ -197,6 +197,7 @@ defmodule PackageRepository do
   @impl true
   def terminate(_, conn) do
     Logger.debug("Closing database")
+
     if conn != nil do
       Sqlite3.close(conn)
     end

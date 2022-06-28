@@ -17,8 +17,9 @@ defmodule Archives do
     File.close(temp_file)
     port = Port.open({:spawn, exe <> " -d -c " <> temp_path}, [:binary])
     Port.monitor(port)
-    result = recieve_external(port, <<>>)
+    result = receive_external(port, <<>>)
     File.rm(temp_path)
+    # {:ok,result}=File.read(Path.rootname(temp_path,extension))
     result
   end
 
@@ -47,13 +48,22 @@ defmodule Archives do
     data
   end
 
-  defp recieve_external(port, data) do
+  defp receive_external(port, data) do
     receive do
       {^port, {:data, msg}} ->
-        recieve_external(port, data <> msg)
+        receive_external(port, data <> msg)
 
       {:DOWN, _, :port, ^port, _} ->
         data
     end
   end
+
+  # defp receive_closing(port, data) do
+  #   receive do
+  #     {^port, {:data, msg}} ->
+  #       receive_closing(port, data <> msg)
+  #   after
+  #     0 -> data
+  #   end
+  # end
 end
