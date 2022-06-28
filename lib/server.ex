@@ -23,6 +23,10 @@ defmodule Server do
     send_resp(conn, 200, archive)
   end
 
+  get "/" do
+    send_file(conn, 200, "static/index.html")
+  end
+
   match _ do
     send_resp(conn, 404, "")
   end

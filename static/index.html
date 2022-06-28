@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Altgwin</title>
+</head>
+<body>
+  <main class="wrapper container">
+  <input class="form-control" id="input" type="text"></input>
+  <button class="btn btn-primary" onClick="download();">Download</button>
+  </main>
+  <script type="text/javascript">
+    function download() {
+      const input=document.getElementById('input').value;
+      const files=input.split(",");
+      const query=files.map(f=>"files[]="+encodeURIComponent(f)).join('&');
+      window.location.href = '/download?'+query;
+    }
+  	document.getElementById('input').addEventListener('keyup', ({key}) => {
+  		if (key == 'Enter') {
+  		  download();
+  		}
+  		return true;
+  	});
+  </script>
+</body>
+</html>
