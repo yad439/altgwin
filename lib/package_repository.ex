@@ -54,9 +54,11 @@ defmodule PackageRepository do
   end
 
   def get_packages_for_files(service, files) do
+    files = Stream.map(files, &("usr/bin/" <> &1))
     rows = GenServer.call(service, {:get_packages_for_files, files})
 
     rows
+    |> Enum.sort_by(&Enum.fetch!(&1, 0))
     |> Stream.chunk_by(&Enum.fetch!(&1, 0))
     |> Enum.map(fn chunk ->
       %{
@@ -157,12 +159,18 @@ defmodule PackageRepository do
 
   @impl true
   def handle_call({:get_packages_for_files, files}, _, conn) do
-    rows =
-      execute_select(
+    {:ok, statement} =
+      Sqlite3.prepare(
         conn,
-        "select packages.name, packages.path, files.name, files.path from packages inner join files on packages.name=files.package_name where files.name in (?) order by packages.name",
-        [files]
+        "select packages.name, packages.path, files.name, files.path from packages inner join files on packages.name=files.package_name where files.path = (?1)"
       )
+
+    rows =
+      Enum.flat_map(files, fn file ->
+        :ok = Sqlite3.bind(conn, statement, [file])
+        {:ok, row} = Sqlite3.fetch_all(conn, statement)
+        row
+      end)
 
     {:reply, rows, conn}
   end

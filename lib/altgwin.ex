@@ -59,16 +59,7 @@ defmodule Altgwin do
   end
 
   defp get_files(filenames, mirror) do
-    packages =
-      Stream.map(filenames, &PackageRepository.get_package_for_file(PackageRepository, &1))
-      |> Stream.chunk_by(& &1.package_name)
-      |> Stream.map(
-        &%{
-          name: hd(&1).package_name,
-          path: hd(&1).package_path,
-          files: Enum.map(&1, fn fl -> %{name: fl.file_name, path: fl.file_path} end)
-        }
-      )
+    packages = PackageRepository.get_packages_for_files(PackageRepository, filenames)
 
     Enum.flat_map(packages, fn package ->
       {:ok, archive} = Finch.build(:get, mirror <> package.path) |> Finch.request(FinchClient)
