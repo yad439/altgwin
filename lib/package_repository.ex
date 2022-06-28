@@ -1,9 +1,11 @@
 defmodule PackageRepository do
   use GenServer
+  require Logger
   alias Exqlite.Sqlite3
 
   def start_link(filename) do
-    GenServer.start_link(__MODULE__, filename)
+    Logger.info("Connecting to database " <> filename)
+    GenServer.start_link(__MODULE__, filename, name: __MODULE__)
   end
 
   def add_package(service, package) do
@@ -65,7 +67,7 @@ defmodule PackageRepository do
     end)
   end
 
-  def get_dependencies(service,files) do
+  def get_dependencies(service, files) do
     GenServer.call(service, {:get_dependencies, files}) |> Stream.map(&hd/1)
   end
 
@@ -136,6 +138,12 @@ defmodule PackageRepository do
   end
 
   @impl true
+  def handle_cast(:close, conn) do
+    Sqlite3.close(conn)
+    {:noreply, nil}
+  end
+
+  @impl true
   def handle_call(:get_versions, _, conn) do
     rows = execute_select(conn, "select name, version from packages", nil)
     {:reply, rows, conn}
@@ -173,20 +181,17 @@ defmodule PackageRepository do
 
   @impl true
   def handle_call({:get_dependencies, files}, _, conn) do
-    {:ok, statement} = Sqlite3.prepare(conn,"select dependency from depenndencies where file = ?")
-    rows = Enum.flat_map files, fn file->
-      :ok = Sqlite3.bind(conn, statement, [file])
-      {:ok, res} = Sqlite3.fetch_all(conn, statement)
-      res
-    end
+    {:ok, statement} = Sqlite3.prepare(conn, "select dependency from dependencies where file = ?")
+
+    rows =
+      Enum.flat_map(files, fn file ->
+        :ok = Sqlite3.bind(conn, statement, [file])
+        {:ok, res} = Sqlite3.fetch_all(conn, statement)
+        res
+      end)
+
     :ok = Sqlite3.release(conn, statement)
     {:reply, rows, conn}
-  end
-
-  @impl true
-  def handle_cast(:close, conn) do
-    Sqlite3.close(conn)
-    {:noreply, nil}
   end
 
   @impl true

@@ -5,7 +5,7 @@ defmodule Altgwin.MixProject do
     [
       app: :altgwin,
       version: "0.1.0",
-      elixir: "~> 1.12",
+      elixir: ">= 1.12.0",
       start_permanent: Mix.env() == :prod,
       escript: [main_module: Altgwin],
       deps: deps()
@@ -15,8 +15,9 @@ defmodule Altgwin.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
-      # mod: {Altgwin, []}
+      extra_applications: [:logger],
+      mod: {Altgwin.App, []},
+      env: [mirror: "https://mirror.easyname.at/cygwin/"]
     ]
   end
 
@@ -30,7 +31,8 @@ defmodule Altgwin.MixProject do
       # {:ex_zstd, ">= 0.1.0"},
       # {:xz, ">= 0.3.0"}
       {:temp, ">= 0.4.0"},
-      {:exqlite, ">= 0.11.2"}
+      {:exqlite, ">= 0.11.2"},
+      {:plug_cowboy, ">= 2.0.0"}
     ]
   end
 end
