@@ -2,8 +2,15 @@ defmodule Server do
   use Plug.Router
 
   plug(Plug.Logger, log: :debug)
+  plug(:auth)
   plug(:match)
   plug(:dispatch)
+
+  defp auth(conn, _) do
+    username = System.fetch_env!("AUTH_USERNAME")
+    password = System.fetch_env!("AUTH_PASSWORD")
+    Plug.BasicAuth.basic_auth(conn, username: username, password: password)
+  end
 
   get "/hello" do
     send_resp(conn, 200, "world")
