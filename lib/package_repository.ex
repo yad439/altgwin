@@ -69,6 +69,14 @@ defmodule PackageRepository do
     end)
   end
 
+  def add_dependencies(service, file, dependencies) do
+    GenServer.cast(service, {:add_dependencies, file, dependencies})
+  end
+
+  def remove_dependency(service, file, dependency) do
+    GenServer.cast(service, {:add_dependencies, file, dependency})
+  end
+
   def get_dependencies(service, files) do
     GenServer.call(service, {:get_dependencies, files}) |> Stream.map(&hd/1)
   end
@@ -135,6 +143,26 @@ defmodule PackageRepository do
       package.path,
       package.name
     ])
+
+    {:noreply, conn}
+  end
+
+  @impl true
+  def handle_cast({:add_dependencies, file, dependencies}, conn) do
+    {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "insert into dependencies values (?,?)")
+
+    Enum.each(dependencies, fn dependency ->
+      Sqlite3.bind(conn, statement, [file, depndency])
+      :done = Sqlite3.step(conn, statement)
+    end)
+
+    :ok = Sqlite3.release(conn, statement)
+    {:noreply, conn}
+  end
+
+  @impl true
+  def handle_cast({:remove_dependency, file, dependency}, conn) do
+    execute(conn, "delete from dependencies where file = ? and dependency = ?", [file, dependency])
 
     {:noreply, conn}
   end
