@@ -74,7 +74,7 @@ defmodule PackageRepository do
   end
 
   def remove_dependency(service, file, dependency) do
-    GenServer.cast(service, {:add_dependencies, file, dependency})
+    GenServer.cast(service, {:remove_dependency, file, dependency})
   end
 
   def get_dependencies(service, files) do

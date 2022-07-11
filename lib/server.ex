@@ -26,9 +26,9 @@ defmodule Server do
 
   put "/dependencies" do
     :ok =
-      PackageRepository.add_dependecies(
+      PackageRepository.add_dependencies(
         PackageRepository,
-        conn.params["files"],
+        conn.params["file"],
         conn.params["dependencies"]
       )
 
@@ -37,7 +37,7 @@ defmodule Server do
 
   delete "/dependencies" do
     :ok =
-      PackageRepository.remove_dependecy(
+      PackageRepository.remove_dependency(
         PackageRepository,
         conn.params["file"],
         conn.params["dependency"]
