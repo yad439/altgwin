@@ -61,12 +61,18 @@ defmodule Altgwin do
   defp get_files(filenames, mirror) do
     packages = PackageRepository.get_packages_for_files(PackageRepository, filenames)
 
-    Enum.flat_map(packages, fn package ->
-      {:ok, archive} = Finch.build(:get, mirror <> package.path) |> Finch.request(FinchClient)
+    Task.Supervisor.async_stream(
+      TaskSupervisor,
+      packages,
+      fn package ->
+        {:ok, archive} = Finch.build(:get, mirror <> package.path) |> Finch.request(FinchClient)
 
-      Archives.extract_files(archive.body, package.path, Stream.map(package.files, & &1.path))
-      |> Stream.map(fn {path, data} -> {Path.basename(to_string(path)), data} end)
-    end)
+        Archives.extract_files(archive.body, package.path, Stream.map(package.files, & &1.path))
+        |> Stream.map(fn {path, data} -> {Path.basename(to_string(path)), data} end)
+      end,
+      ordered: false
+    )
+    |> Enum.flat_map(fn {:ok, f} -> f end)
   end
 
   def get_dependencies(files) do
