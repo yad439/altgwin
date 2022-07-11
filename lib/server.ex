@@ -3,9 +3,9 @@ defmodule Server do
 
   plug(Plug.Logger, log: :debug)
   plug(:auth)
+  plug(Plug.Parsers, parsers: [:urlencoded])
   plug(:match)
   plug(:dispatch)
-  plug(Plug.Parsers, parsers: [:urlencoded])
 
   defp auth(conn, _) do
     username = System.fetch_env!("AUTH_USERNAME")
