@@ -46,6 +46,12 @@ defmodule Server do
     send_resp(conn, 204, <<>>)
   end
 
+  post "/update" do
+    :ok = Altgwin.detect_outdated(Application.fetch_env!(:altgwin, :mirror))
+    Task.Supervisor.start_child(TaskSupervisor, Altgwin, :update_files, [], restart: :transient)
+    send_resp(conn, 202, <<>>)
+  end
+
   get "/" do
     send_file(conn, 200, "static/index.html")
   end
