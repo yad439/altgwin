@@ -152,7 +152,7 @@ defmodule PackageRepository do
     {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "insert into dependencies values (?,?)")
 
     Enum.each(dependencies, fn dependency ->
-      Sqlite3.bind(conn, statement, [file, depndency])
+      Sqlite3.bind(conn, statement, [file, dependency])
       :done = Sqlite3.step(conn, statement)
     end)
 
