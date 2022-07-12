@@ -6,7 +6,7 @@ defmodule Altgwin.App do
     children = [
       {PackageRepository, "packages.db"},
       {Finch, name: FinchClient},
-      {Plug.Cowboy, scheme: :http, plug: Server, options: [port: 80]},
+      {Plug.Cowboy, scheme: :http, plug: Server, options: [port: 8080]},
       {Task.Supervisor, name: TaskSupervisor}
     ]
 
