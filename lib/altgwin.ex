@@ -1,11 +1,30 @@
 defmodule Altgwin do
   require Logger
 
-  # def main(_) do
+  defp mirror, do: Application.fetch_env!(:altgwin, :mirror)
 
-  # end
+  def update_database() do
+    :ok = detect_outdated(mirror())
 
-  def detect_outdated(mirror) do
+    {:ok, _} =
+      Task.Supervisor.start_child(TaskSupervisor, fn -> update_files() end, restart: :transient)
+
+    :ok
+  end
+
+  def get_dependencies(file), do: PackageRepository.get_dependencies(PackageRepository, [file])
+
+  def remove_dependency(file, dependency) do
+    Logger.info(["Removing dependency: ", file, " -> ", dependency])
+    PackageRepository.remove_dependency(PackageRepository, file, dependency)
+  end
+
+  def add_dependencies(file, dependencies) do
+    Logger.info(["Adding dependencies: ", file, " -> ", Enum.join(dependencies,", ")])
+    PackageRepository.add_dependencies(PackageRepository, file, dependencies)
+  end
+
+  defp detect_outdated(mirror) do
     Logger.info("Updating packages")
     packages = CygwinApi.get_packages(mirror)
 
@@ -40,7 +59,7 @@ defmodule Altgwin do
     end)
   end
 
-  def update_files() do
+  defp update_files() do
     Logger.info("Updating files")
     outdated = PackageRepository.get_outdated(PackageRepository)
 
@@ -52,9 +71,9 @@ defmodule Altgwin do
   end
 
   def prepare_download(filenames) do
-    all_filenames = get_dependencies(filenames)
+    all_filenames = get_all_dependencies(filenames)
     Logger.debug(requested_files: filenames, all_files: all_filenames)
-    files = get_files(all_filenames, Application.fetch_env!(:altgwin, :mirror))
+    files = get_files(all_filenames, mirror())
     Archives.create_zip(files)
   end
 
@@ -75,11 +94,11 @@ defmodule Altgwin do
     |> Enum.flat_map(fn {:ok, f} -> f end)
   end
 
-  def get_dependencies(files) do
-    get_dependencies(MapSet.new(files), PackageRepository, MapSet.new())
+  defp get_all_dependencies(files) do
+    get_all_dependencies(MapSet.new(files), PackageRepository, MapSet.new())
   end
 
-  defp get_dependencies(files, repository, done) do
+  defp get_all_dependencies(files, repository, done) do
     if Enum.empty?(files) do
       files
     else
@@ -88,7 +107,7 @@ defmodule Altgwin do
 
       MapSet.union(
         MapSet.union(MapSet.new(files), direct),
-        get_dependencies(MapSet.difference(direct, done), repository, done)
+        get_all_dependencies(MapSet.difference(direct, done), repository, done)
       )
     end
   end

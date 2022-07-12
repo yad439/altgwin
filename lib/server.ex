@@ -20,35 +20,24 @@ defmodule Server do
   end
 
   get "/dependencies" do
-    deps = PackageRepository.get_dependencies(PackageRepository, [conn.params["file"]])
+    deps = Altgwin.get_dependencies(conn.params["file"])
     send_resp(conn, 200, Enum.join(deps, "\n"))
   end
 
   put "/dependencies" do
-    :ok =
-      PackageRepository.add_dependencies(
-        PackageRepository,
-        conn.params["file"],
-        conn.params["dependencies"]
-      )
+    :ok = Altgwin.add_dependencies(conn.params["file"], conn.params["dependencies"])
 
     send_resp(conn, 201, <<>>)
   end
 
   delete "/dependencies" do
-    :ok =
-      PackageRepository.remove_dependency(
-        PackageRepository,
-        conn.params["file"],
-        conn.params["dependency"]
-      )
+    :ok = Altgwin.remove_dependency(conn.params["file"], conn.params["dependency"])
 
     send_resp(conn, 204, <<>>)
   end
 
   post "/update" do
-    :ok = Altgwin.detect_outdated(Application.fetch_env!(:altgwin, :mirror))
-    Task.Supervisor.start_child(TaskSupervisor, Altgwin, :update_files, [], restart: :transient)
+    :ok = Altgwin.update_database()
     send_resp(conn, 202, <<>>)
   end
 
