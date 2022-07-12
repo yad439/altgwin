@@ -12,14 +12,13 @@ defmodule Archives do
   end
 
   def decompress_external(exe, data, extension) do
-    {:ok, temp_file, temp_path} = Temp.open(suffix: extension)
+    {:ok, temp_file, temp_path} = Temp.open(%{suffix: extension})
     :ok = IO.binwrite(temp_file, data)
     :ok = File.close(temp_file)
     port = Port.open({:spawn, exe <> " -d -c " <> temp_path}, [:binary])
     Port.monitor(port)
     result = receive_external(port, <<>>)
     :ok = File.rm(temp_path)
-    # {:ok,result}=File.read(Path.rootname(temp_path,extension))
     result
   end
 
@@ -32,9 +31,7 @@ defmodule Archives do
 
   def create_zip(files) do
     {:ok, {_, data}} =
-      :zip.zip("", Enum.map(files, fn {name, data} -> {to_charlist(name), data} end), [
-        :memory
-      ])
+      :zip.zip('', Enum.map(files, fn {name, data} -> {to_charlist(name), data} end), [:memory])
 
     data
   end
