@@ -95,7 +95,7 @@ defmodule PackageRepository do
     {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "insert into packages values (?,?,?,1)")
 
     Enum.each(packages, fn pack ->
-      Sqlite3.bind(conn, statement, [pack.name, pack.version, pack.path])
+      :ok = Sqlite3.bind(conn, statement, [pack.name, pack.version, pack.path])
       :done = Sqlite3.step(conn, statement)
     end)
 
@@ -127,7 +127,7 @@ defmodule PackageRepository do
     {:ok, statement} = Sqlite3.prepare(conn, "insert into files values ((?1),(?2),(?3))")
 
     Enum.each(files, fn file ->
-      Sqlite3.bind(conn, statement, [file, Path.basename(file), package])
+      :ok = Sqlite3.bind(conn, statement, [file, Path.basename(file), package])
       :done = Sqlite3.step(conn, statement)
     end)
 
@@ -152,7 +152,7 @@ defmodule PackageRepository do
     {:ok, statement} = Exqlite.Sqlite3.prepare(conn, "insert into dependencies values (?,?)")
 
     Enum.each(dependencies, fn dependency ->
-      Sqlite3.bind(conn, statement, [file, dependency])
+      :ok = Sqlite3.bind(conn, statement, [file, dependency])
       :done = Sqlite3.step(conn, statement)
     end)
 
@@ -169,7 +169,7 @@ defmodule PackageRepository do
 
   @impl true
   def handle_cast(:close, conn) do
-    Sqlite3.close(conn)
+    :ok = Sqlite3.close(conn)
     {:noreply, nil}
   end
 

@@ -13,23 +13,23 @@ defmodule CygwinApi do
         cur = Agent.get(current, & &1)
 
         if cur != nil do
-          Agent.update(packages, &[cur | &1])
+          :ok = Agent.update(packages, &[cur | &1])
         end
 
-        Agent.update(current, fn _ -> %{:name => name} end)
-        Agent.update(prev, fn _ -> false end)
+        :ok = Agent.update(current, fn _ -> %{:name => name} end)
+        :ok = Agent.update(prev, fn _ -> false end)
 
       ["[prev]"] ->
-        Agent.update(prev, fn _ -> true end)
+        :ok = Agent.update(prev, fn _ -> true end)
 
       ["install:", path, _size, _hash] ->
         if Agent.get(prev, &(!&1)) do
-          Agent.update(current, &Map.put(&1, :path, path))
+          :ok = Agent.update(current, &Map.put(&1, :path, path))
         end
 
       ["version:", version] ->
         if Agent.get(prev, &(!&1)) do
-          Agent.update(current, &Map.put(&1, :version, version))
+          :ok = Agent.update(current, &Map.put(&1, :version, version))
         end
 
       _ ->
@@ -41,11 +41,11 @@ defmodule CygwinApi do
     {:ok, packages} = Agent.start_link(fn -> [] end)
     {:ok, current} = Agent.start_link(fn -> nil end)
     {:ok, prev} = Agent.start_link(fn -> false end)
-    Enum.each(stream, fn line -> parse_setup_line(line, packages, current, prev) end)
+    :ok = Enum.each(stream, fn line -> parse_setup_line(line, packages, current, prev) end)
     cur = Agent.get(current, & &1)
 
     if cur != nil do
-      Agent.update(packages, &[cur | &1])
+      :ok = Agent.update(packages, &[cur | &1])
     end
 
     Agent.get(packages, & &1)

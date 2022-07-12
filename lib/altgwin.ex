@@ -16,12 +16,12 @@ defmodule Altgwin do
 
   def remove_dependency(file, dependency) do
     Logger.info(["Removing dependency: ", file, " -> ", dependency])
-    PackageRepository.remove_dependency(PackageRepository, file, dependency)
+    :ok = PackageRepository.remove_dependency(PackageRepository, file, dependency)
   end
 
   def add_dependencies(file, dependencies) do
     Logger.info(["Adding dependencies: ", file, " -> ", Enum.join(dependencies, ", ")])
-    PackageRepository.add_dependencies(PackageRepository, file, dependencies)
+    :ok = PackageRepository.add_dependencies(PackageRepository, file, dependencies)
   end
 
   defp detect_outdated(mirror) do
@@ -34,27 +34,28 @@ defmodule Altgwin do
 
     versions = PackageRepository.get_versions(PackageRepository)
 
-    Enum.each(packages, fn package ->
-      case versions[package.name] do
-        nil ->
-          Logger.info("New package: #{package.name}")
-          PackageRepository.add_package(PackageRepository, package)
+    :ok =
+      Enum.each(packages, fn package ->
+        case versions[package.name] do
+          nil ->
+            Logger.info("New package: #{package.name}")
+            :ok = PackageRepository.add_package(PackageRepository, package)
 
-        version when version != package.version ->
-          Logger.info("Package updated: #{package.name} #{version} -> #{package.version}")
-          PackageRepository.set_outdated(PackageRepository, package)
+          version when version != package.version ->
+            Logger.info("Package updated: #{package.name} #{version} -> #{package.version}")
+            :ok = PackageRepository.set_outdated(PackageRepository, package)
 
-        _ ->
-          nil
-      end
-    end)
+          _ ->
+            nil
+        end
+      end)
 
     new_packs = MapSet.new(Stream.map(packages, & &1.name))
 
     Enum.each(Map.keys(versions), fn package ->
       if !MapSet.member?(new_packs, package) do
         Logger.info("Package deleted: #{package}")
-        PackageRepository.delete_package(PackageRepository, package)
+        :ok = PackageRepository.delete_package(PackageRepository, package)
       end
     end)
   end
@@ -66,7 +67,7 @@ defmodule Altgwin do
     Enum.each(outdated, fn package ->
       Logger.debug("Update files of " <> package.name)
       files = CygwinApi.get_files(package.name, package.version)
-      PackageRepository.update_files(PackageRepository, package.name, files)
+      :ok = PackageRepository.update_files(PackageRepository, package.name, files)
     end)
   end
 
