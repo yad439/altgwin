@@ -48,7 +48,13 @@ defmodule CygwinApi do
       :ok = Agent.update(packages, &[cur | &1])
     end
 
-    Agent.get(packages, & &1)
+    result = Agent.get(packages, & &1)
+
+    Agent.stop(packages)
+    Agent.stop(current)
+    Agent.stop(prev)
+
+    result
   end
 
   def get_files(package, version) do
