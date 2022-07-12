@@ -20,7 +20,7 @@ defmodule Altgwin do
   end
 
   def add_dependencies(file, dependencies) do
-    Logger.info(["Adding dependencies: ", file, " -> ", Enum.join(dependencies,", ")])
+    Logger.info(["Adding dependencies: ", file, " -> ", Enum.join(dependencies, ", ")])
     PackageRepository.add_dependencies(PackageRepository, file, dependencies)
   end
 
