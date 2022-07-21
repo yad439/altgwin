@@ -81,6 +81,17 @@ defmodule Altgwin do
   defp get_files(filenames, mirror) do
     packages = PackageRepository.get_packages_for_files(PackageRepository, filenames)
 
+    got_files =
+      packages
+      |> Stream.flat_map(fn package -> Stream.map(package.files, & &1.name) end)
+      |> MapSet.new()
+
+    Enum.each(filenames, fn file ->
+      if !MapSet.member?(got_files, file) do
+        Logger.warning(["Did not found package for file ", file])
+      end
+    end)
+
     Task.Supervisor.async_stream(
       TaskSupervisor,
       packages,
