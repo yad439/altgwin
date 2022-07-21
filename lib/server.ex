@@ -14,26 +14,51 @@ defmodule Server do
   end
 
   get "/download" do
-    archive = Altgwin.prepare_download(conn.params["files"])
-    conn = put_resp_content_type(conn, "application/zip")
-    send_resp(conn, 200, archive)
+    files = conn.params["files"]
+
+    if is_list(files) && Enum.each(files, &is_bitstring/1) do
+      archive = Altgwin.prepare_download(files)
+      conn = put_resp_content_type(conn, "application/zip")
+      send_resp(conn, 200, archive)
+    else
+      send_resp(conn, 400, <<>>)
+    end
   end
 
   get "/dependencies" do
-    deps = Altgwin.get_dependencies(conn.params["file"])
-    send_resp(conn, 200, Enum.join(deps, "\n"))
+    file = conn.params["file"]
+
+    if is_bitstring(file) do
+      deps = Altgwin.get_dependencies(file)
+      send_resp(conn, 200, Enum.join(deps, "\n"))
+    else
+      send_resp(conn, 400, <<>>)
+    end
   end
 
   put "/dependencies" do
-    :ok = Altgwin.add_dependencies(conn.params["file"], conn.params["dependencies"])
+    file = conn.params["file"]
+    dependencies = conn.params["dependencies"]
 
-    send_resp(conn, 201, <<>>)
+    if is_bitstring(file) && is_list(dependencies) && Enum.each(dependencies, &is_bitstring/1) do
+      :ok = Altgwin.add_dependencies(file, dependencies)
+      send_resp(conn, 201, <<>>)
+    else
+      send_resp(conn, 400, <<>>)
+    end
   end
 
   delete "/dependencies" do
-    :ok = Altgwin.remove_dependency(conn.params["file"], conn.params["dependency"])
+    file = conn.params["file"]
+    dependency = conn.params["dependency"]
 
-    send_resp(conn, 204, <<>>)
+    if is_bitstring(file) && is_bitstring(dependency) do
+      :ok = Altgwin.remove_dependency(file, dependency)
+
+      send_resp(conn, 204, <<>>)
+    else
+      send_resp(conn, 400, <<>>)
+    end
   end
 
   post "/update" do
