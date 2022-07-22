@@ -1,28 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Altgwin</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Altgwin</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<script>
+		tailwind.config = {
+			darkMode: 'class'
+		}
+	</script>
 </head>
-<body>
-  <main class="wrapper container">
-  <input class="form-control" id="input" type="text"></input>
-  <button class="btn btn-primary" onClick="download();">Download</button>
-  </main>
-  <script type="text/javascript">
-    function download() {
-      const input=document.getElementById('input').value;
-      const files=input.split(",");
-      const query=files.map(f=>"files[]="+encodeURIComponent(f)).join('&');
-      window.location.href = '/download?'+query;
-    }
-  	document.getElementById('input').addEventListener('keyup', ({key}) => {
-  		if (key == 'Enter') {
-  		  download();
-  		}
-  		return true;
-  	});
-  </script>
+
+<body class="dark:bg-gray-800">
+	<main class="flex justify-center p-8 space-x-4">
+		<input
+			class="text-xl border-2 rounded px-2 shadow-md dark:shadow-slate-100/50 dark:bg-inherit border-inherit dark:text-white"
+			id="input" type="text"></input>
+		<button
+			class="text-xl border-2 rounded px-6 shadow-md dark:shadow-slate-100/50 bg-slate-300 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-gray-600 border-inherit dark:text-white"
+			onClick="download();">Download</button>
+	</main>
+	<script type="text/javascript">
+		function download() {
+			const input = document.getElementById('input').value;
+			const files = input.split(",");
+			const query = files.map(f => "files[]=" + encodeURIComponent(f)).join('&');
+			window.location.href = '/download?' + query;
+		}
+		document.getElementById('input').addEventListener('keyup', ({ key }) => {
+			if (key == 'Enter') {
+				download();
+			}
+			return true;
+		});
+	</script>
 </body>
+
 </html>
