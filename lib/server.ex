@@ -2,6 +2,7 @@ defmodule Server do
   use Plug.Router
 
   plug(Plug.Logger, log: :debug)
+  plug(Plug.Static, at: "/static", from: "static")
   plug(:auth)
   plug(Plug.Parsers, parsers: [:urlencoded])
   plug(:match)

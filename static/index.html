@@ -11,31 +11,16 @@
 			darkMode: 'class'
 		}
 	</script>
+	<script src="/static/lib/react.production.min.js"></script>
+	<script src="/static/lib/react-dom.production.min.js"></script>
+	<script src="/static/lib/babel.min.js"></script>
 </head>
 
 <body class="dark:bg-gray-800">
-	<main class="flex justify-center p-8 space-x-4">
-		<input
-			class="text-xl border-2 rounded px-2 shadow-md dark:shadow-slate-100/50 dark:bg-inherit border-inherit dark:text-white"
-			id="input" type="text"></input>
-		<button
-			class="text-xl border-2 rounded px-6 shadow-md dark:shadow-slate-100/50 bg-slate-300 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-gray-600 border-inherit dark:text-white"
-			onClick="download();">Download</button>
-	</main>
-	<script type="text/javascript">
-		function download() {
-			const input = document.getElementById('input').value;
-			const files = input.split(",");
-			const query = files.map(f => "files[]=" + encodeURIComponent(f)).join('&');
-			window.location.href = '/download?' + query;
-		}
-		document.getElementById('input').addEventListener('keyup', ({ key }) => {
-			if (key == 'Enter') {
-				download();
-			}
-			return true;
-		});
-	</script>
+	<main class="flex justify-center p-8"></main>
+
+	<script type="text/jsx" src="/static/input.jsx"></script>
+	<script type="text/jsx" src="/static/index.jsx"></script>
 </body>
 
 </html>
