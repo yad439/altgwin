@@ -123,16 +123,32 @@ defmodule PackageRepository do
 
   @impl true
   def handle_cast({:update, package, files}, conn) do
-    execute(conn, "delete from files where package_name = ?", [package])
-    {:ok, statement} = Sqlite3.prepare(conn, "insert into files values ((?1),(?2),(?3))")
+    file_set = MapSet.new(files)
 
-    Enum.each(files, fn file ->
+    existing_set =
+      execute_select(conn, "select * from files where package_name = ?", [package])
+      |> Stream.map(&hd/1)
+      |> MapSet.new()
+
+    {:ok, statement} =
+      Sqlite3.prepare(conn, "delete from files where package_name = ? and path = ?")
+
+    Enum.each(MapSet.difference(existing_set, file_set), fn file ->
+      :ok = Sqlite3.bind(conn, statement, [package, file])
+      :done = Sqlite3.step(conn, statement)
+    end)
+
+    :ok = Sqlite3.release(conn, statement)
+
+    {:ok, statement} = Sqlite3.prepare(conn, "insert into files values (?,?,?)")
+
+    Enum.each(MapSet.difference(file_set, existing_set), fn file ->
       :ok = Sqlite3.bind(conn, statement, [file, Path.basename(file), package])
       :done = Sqlite3.step(conn, statement)
     end)
 
     :ok = Sqlite3.release(conn, statement)
-    execute(conn, "update packages set needs_update = 0 where name = ?", [package])
+
     {:noreply, conn}
   end
 
