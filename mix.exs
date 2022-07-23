@@ -15,7 +15,7 @@ defmodule Altgwin.MixProject do
     [
       extra_applications: [:logger],
       mod: {Altgwin.App, []},
-      env: [mirror: "https://mirror.easyname.at/cygwin/"]
+      env: [mirror: "https://cygwin.mirror.constant.com/"]
     ]
   end
 
