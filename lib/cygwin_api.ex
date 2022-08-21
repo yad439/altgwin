@@ -37,7 +37,7 @@ defmodule CygwinApi do
     end
   end
 
-  def parse_setup(stream) do
+  defp parse_setup(stream) do
     {:ok, packages} = Agent.start_link(fn -> [] end)
     {:ok, current} = Agent.start_link(fn -> nil end)
     {:ok, prev} = Agent.start_link(fn -> false end)

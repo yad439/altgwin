@@ -3,7 +3,7 @@ defmodule Archives do
     extract_tar(decompress(archive, Path.extname(name)), files)
   end
 
-  def decompress(data, extension) do
+  defp decompress(data, extension) do
     case extension do
       ".bz2" -> decompress_external("bzip2", data, extension)
       ".xz" -> decompress_external("xz", data, extension)
@@ -11,7 +11,7 @@ defmodule Archives do
     end
   end
 
-  def decompress_external(exe, data, extension) do
+  defp decompress_external(exe, data, extension) do
     {:ok, temp_file, temp_path} = Temp.open(%{suffix: extension})
     :ok = IO.binwrite(temp_file, data)
     :ok = File.close(temp_file)
@@ -22,7 +22,7 @@ defmodule Archives do
     result
   end
 
-  def extract_tar(archive, files) do
+  defp extract_tar(archive, files) do
     {:ok, result} =
       :erl_tar.extract({:binary, archive}, [{:files, Enum.map(files, &to_charlist/1)}, :memory])
 
