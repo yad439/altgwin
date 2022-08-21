@@ -25,7 +25,8 @@ defmodule Altgwin.MixProject do
       {:floki, ">= 0.32.0"},
       {:temp, ">= 0.4.0"},
       {:exqlite, ">= 0.11.2"},
-      {:plug_cowboy, ">= 2.0.0"}
+      {:plug_cowboy, ">= 2.0.0"},
+      {:dialyxir, ">= 1.0.0", only: [:dev], runtime: false}
     ]
   end
 end
