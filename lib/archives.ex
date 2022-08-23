@@ -26,7 +26,9 @@ defmodule Archives do
     {:ok, result} =
       :erl_tar.extract({:binary, archive}, [{:files, Enum.map(files, &to_charlist/1)}, :memory])
 
-    result
+    for {path, data} <- result do
+      {to_string(path), data}
+    end
   end
 
   def create_zip(files) do

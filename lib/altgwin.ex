@@ -99,7 +99,7 @@ defmodule Altgwin do
         {:ok, archive} = Finch.build(:get, mirror <> package.path) |> Finch.request(FinchClient)
 
         Archives.extract_files(archive.body, package.path, Stream.map(package.files, & &1.path))
-        |> Stream.map(fn {path, data} -> {Path.basename(to_string(path)), data} end)
+        |> Stream.map(fn {path, data} -> {Path.basename(path), data} end)
       end,
       ordered: false
     )
