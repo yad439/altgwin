@@ -2,7 +2,7 @@ defmodule Server do
   use Plug.Router
 
   plug(Plug.Logger, log: :debug)
-  plug(Plug.Static, at: "/static", from: "static")
+  plug(Plug.Static, at: "/static", from: :altgwin)
   plug(:auth)
   plug(Plug.Parsers, parsers: [:urlencoded])
   plug(:match)
@@ -68,7 +68,7 @@ defmodule Server do
   end
 
   get "/" do
-    send_file(conn, 200, "static/index.html")
+    send_file(conn, 200, Application.app_dir(:altgwin, ["priv", "static", "index.html"]))
   end
 
   match _ do
