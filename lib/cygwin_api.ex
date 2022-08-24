@@ -72,4 +72,10 @@ defmodule CygwinApi do
     |> Stream.map(&Enum.fetch!(&1, 3))
     |> Enum.filter(&(String.ends_with?(&1, ".dll") || String.ends_with?(&1, ".exe")))
   end
+
+  def download_package(mirror, path) do
+    {:ok, response} = Finch.build(:get, mirror <> path) |> Finch.request(FinchClient)
+
+    response.body
+  end
 end

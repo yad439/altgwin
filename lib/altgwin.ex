@@ -96,9 +96,9 @@ defmodule Altgwin do
       TaskSupervisor,
       packages,
       fn package ->
-        {:ok, archive} = Finch.build(:get, mirror <> package.path) |> Finch.request(FinchClient)
+        archive = CygwinApi.download_package(mirror, package.path)
 
-        Archives.extract_files(archive.body, package.path, Stream.map(package.files, & &1.path))
+        Archives.extract_files(archive, package.path, Stream.map(package.files, & &1.path))
         |> Stream.map(fn {path, data} -> {Path.basename(path), data} end)
       end,
       ordered: false
