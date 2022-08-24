@@ -1,10 +1,8 @@
 defmodule CygwinApi do
-  def get_packages(base) do
-    {:ok, response} =
-      Finch.build(:get, base <> "x86_64/setup.ini")
-      |> Finch.request(FinchClient)
+  @client Application.compile_env(:altgwin, :http_client, FinchHttpClient)
 
-    parse_setup(String.split(response.body, "\n"))
+  def get_packages(base) do
+    @client.get(base <> "x86_64/setup.ini") |> String.split("\n") |> parse_setup()
   end
 
   defp parse_setup_line(line, packages, current, prev) do
@@ -58,11 +56,9 @@ defmodule CygwinApi do
   end
 
   def get_files(package, version) do
-    {:ok, response} =
-      Finch.build(:get, "https://cygwin.com/packages/x86_64/#{package}/#{package}-#{version}")
-      |> Finch.request(FinchClient)
-
-    {:ok, document} = Floki.parse_document(response.body)
+    {:ok, document} =
+      @client.get("https://cygwin.com/packages/x86_64/#{package}/#{package}-#{version}")
+      |> Floki.parse_document()
 
     document
     |> Floki.find("pre")
@@ -73,9 +69,5 @@ defmodule CygwinApi do
     |> Enum.filter(&(String.ends_with?(&1, ".dll") || String.ends_with?(&1, ".exe")))
   end
 
-  def download_package(mirror, path) do
-    {:ok, response} = Finch.build(:get, mirror <> path) |> Finch.request(FinchClient)
-
-    response.body
-  end
+  def download_package(mirror, path), do: @client.get(mirror <> path)
 end
