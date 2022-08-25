@@ -1,4 +1,6 @@
 defmodule Archives do
+  require Logger
+
   def extract_files(archive, name, files) do
     extract_tar(decompress(archive, Path.extname(name)), files)
   end
@@ -26,9 +28,16 @@ defmodule Archives do
     {:ok, result} =
       :erl_tar.extract({:binary, archive}, [{:files, Enum.map(files, &to_charlist/1)}, :memory])
 
-    for {path, data} <- result do
-      {to_string(path), data}
+    result =
+      for {path, data} <- result do
+        {to_string(path), data}
+      end
+
+    if MapSet.new(Stream.map(result, &elem(&1, 0))) != MapSet.new(files) do
+      Logger.error("Could not extract all files from archive")
     end
+
+    result
   end
 
   def create_zip(files) do
