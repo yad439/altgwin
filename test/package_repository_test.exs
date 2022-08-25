@@ -90,6 +90,10 @@ defmodule PackageRepositoryTest do
 
     assert MapSet.new(execute_select(conn, "select name from files")) ==
              MapSet.new([["file3"], ["file4"], ["file5"]])
+
+    assert execute_select(conn, "select needs_update from packages where name = 'package1'") == [
+             [0]
+           ]
   end
 
   test "set_outdated", %{repository: repo} do
