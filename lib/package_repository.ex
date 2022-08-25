@@ -148,6 +148,7 @@ defmodule PackageRepository do
     end)
 
     :ok = Sqlite3.release(conn, statement)
+    execute(conn, "update packages set needs_update = 0 where name = ?", [package])
 
     {:noreply, conn}
   end
