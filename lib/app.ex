@@ -4,7 +4,7 @@ defmodule Altgwin.App do
   @impl true
   def start(_, _) do
     children = [
-      {PackageRepository, "packages.db"},
+      {PackageRepository, database: "packages.db", name: PackageRepository},
       {Finch, name: FinchClient},
       {Plug.Cowboy, scheme: :http, plug: Server, options: [port: 8080]},
       {Task.Supervisor, name: TaskSupervisor}

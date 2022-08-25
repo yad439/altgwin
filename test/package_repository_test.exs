@@ -3,7 +3,7 @@ defmodule PackageRepositoryTest do
   alias Exqlite.Sqlite3
 
   setup do
-    repository = start_supervised!({PackageRepository, ":memory:"})
+    repository = start_supervised!({PackageRepository, database: ":memory:", name: :test_repo})
     conn = :sys.get_state(repository)
 
     :ok =

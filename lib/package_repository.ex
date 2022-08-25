@@ -3,9 +3,9 @@ defmodule PackageRepository do
   require Logger
   alias Exqlite.Sqlite3
 
-  def start_link(filename) do
-    Logger.info("Connecting to database " <> filename)
-    GenServer.start_link(__MODULE__, filename, name: __MODULE__)
+  def start_link(opts) do
+    Logger.info("Connecting to database " <> opts[:database])
+    GenServer.start_link(__MODULE__, opts[:database], name: opts[:name])
   end
 
   def add_package(service, package) do
