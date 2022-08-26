@@ -28,10 +28,6 @@ defmodule PackageRepository do
     GenServer.cast(service, {:outdate, package})
   end
 
-  def update(service, package, files) do
-    GenServer.cast(service, {:update, package, files})
-  end
-
   def get_versions(service) do
     rows = GenServer.call(service, :get_versions)
     Map.new(Stream.map(rows, &List.to_tuple/1))
