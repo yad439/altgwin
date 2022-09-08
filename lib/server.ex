@@ -31,6 +31,7 @@ defmodule Server do
 
     if is_bitstring(file) do
       deps = Altgwin.get_dependencies(file)
+      conn = put_resp_content_type(conn, "text/plain")
       send_resp(conn, 200, Enum.join(deps, "\n"))
     else
       send_resp(conn, 400, <<>>)
@@ -68,6 +69,7 @@ defmodule Server do
   end
 
   get "/" do
+    put_resp_content_type(conn, "text/html")
     send_file(conn, 200, Application.app_dir(:altgwin, ["priv", "static", "index.html"]))
   end
 
