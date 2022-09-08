@@ -71,6 +71,11 @@ defmodule Server do
     send_file(conn, 200, Application.app_dir(:altgwin, ["priv", "static", "index.html"]))
   end
 
+  get "/favicon.ico" do
+    put_resp_content_type(conn, "image/x-icon")
+    send_file(conn, 200, Application.app_dir(:altgwin, ["priv", "static", "favicon.ico"]))
+  end
+
   match _ do
     send_resp(conn, 404, "")
   end
